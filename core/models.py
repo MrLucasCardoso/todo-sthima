@@ -7,7 +7,7 @@ class Todo(models.Model):
     Classe para representar uma tarefa
     """
     name = models.CharField(max_length=100)  # Nome da tarefa, em tamanho reduzido
-    content = models.TextField(null=True)  # Conteudo da tarefa, é TextField para dar uma descrição maior da tarefa
+    content = models.TextField(null=True, blank=True)  # Conteudo da tarefa, é TextField para dar uma descrição maior da tarefa
     done = models.BooleanField(default=False)  # Flag para tarefa concluida e não concluida
     created = models.DateTimeField(auto_now_add=True)  # Data de criação da tarefa
     changed = models.DateTimeField(auto_now_add=True)  # Data de alteração da tarefa
@@ -28,4 +28,8 @@ class Todo(models.Model):
         setar no campo ranking o valor inicial
         """
         self.changed = datetime.now()
+
+        # Em caso de tarefa nova o valor de ranking será a quantidade + 1
+        if not self.pk:
+            self.ranking = self.__class__.objects.count() + 1
         return super(Todo, self).save(force_insert, force_update, using, update_fields)
