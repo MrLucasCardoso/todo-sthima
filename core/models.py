@@ -7,7 +7,7 @@ class Todo(models.Model):
     Classe para representar uma tarefa
     """
     name = models.CharField(max_length=100)  # Nome da tarefa, em tamanho reduzido
-    content = models.TextField(null=True, blank=True)  # Conteudo da tarefa, é TextField para dar uma descrição maior da tarefa
+    content = models.TextField(null=True, blank=True)  # Conteudo da tarefa, é TextField para dar uma descrição maior
     done = models.BooleanField(default=False)  # Flag para tarefa concluida e não concluida
     created = models.DateTimeField(auto_now_add=True)  # Data de criação da tarefa
     changed = models.DateTimeField(auto_now_add=True)  # Data de alteração da tarefa
@@ -31,5 +31,17 @@ class Todo(models.Model):
 
         # Em caso de tarefa nova o valor de ranking será a quantidade + 1
         if not self.pk:
-            self.ranking = self.__class__.objects.count() + 1
+            self.ranking = self.__class__.objects.count() + 1  # Faço uso do __class__ pois o Manager não pode ser \
+            #  acessado de dentro do objeto
+
         return super(Todo, self).save(force_insert, force_update, using, update_fields)
+
+    def delete(self, using=None, keep_parents=False):
+        """Sobrescrevendo metodo delete para atualizar o campo ranking"""
+
+        todos = self.__class__.objects.filter(ranking__gt=self.ranking)  # Filtrando por tarefas com ranking superior
+        for todo in todos:  # Caso existam devo diminuir em 1 cada uma delas
+            todo.ranking -= 1
+            todo.save()
+
+        return super(Todo, self).delete(using, keep_parents)
