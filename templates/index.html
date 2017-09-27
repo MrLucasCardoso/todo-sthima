@@ -97,7 +97,6 @@
                 load_tados();
             },
             error: function(data, textStatus) {
-                alert(data.content);
                 console.log(data);
             }
         });
@@ -112,7 +111,20 @@
                 load_tados();
             },
             error: function(data, textStatus) {
-                alert(data.content);
+                console.log(data);
+            }
+        });
+    }
+
+    function doneItem(pk){
+        $.ajax({
+            type: 'POST',
+            url: '/todo/' + pk + '/done/',
+            dataType: 'json',
+            success: function(data, textStatus, algo) {
+                load_tados();
+            },
+            error: function(data, textStatus) {
                 console.log(data);
             }
         });
@@ -132,7 +144,6 @@
 
             },
             error: function(data, textStatus) {
-                alert(data.content);
                 console.log(data);
             }
         });
@@ -159,9 +170,9 @@
                 li.className = 'draggable';
                 attr.value = 'true';
                 li.setAttributeNode(attr);
-                button = document.createElement('button');
-                button.className = 'btn btn-danger';
-                  button.onclick = (function() {
+                remove_button = document.createElement('button');
+                remove_button.className = 'btn btn-danger';
+                  remove_button.onclick = (function() {
                         var currentI = rowId;
                         return function() {
                             deleteItem(currentI + '');
@@ -169,8 +180,22 @@
                     })();
                 _i = document.createElement('i');
                 _i.className = 'glyphicon glyphicon-trash';
-                button.appendChild(_i);
-                li.appendChild(button);
+                remove_button.appendChild(_i);
+                li.appendChild(remove_button);
+
+                done_button = document.createElement('button');
+                done_button.className = 'btn btn-success';
+                  done_button.onclick = (function() {
+                        var currentI = rowId;
+                        return function() {
+                            doneItem(currentI + '');
+                        }
+                    })();
+                _i = document.createElement('i');
+                _i.className = 'glyphicon glyphicon-ok';
+                done_button.appendChild(_i);
+                li.appendChild(done_button);
+
                 input = document.createElement('input');
                 input.id = 'todo_' + rowId;
                 input.className = 'todo_input';
@@ -187,7 +212,6 @@
                 addEventsDragAndDrop(li);
             },
             error: function(data, textStatus) {
-                alert(data.content);
                 console.log(data);
             }
         });
@@ -210,21 +234,43 @@
                     var li = document.createElement('li');
                     var attr = document.createAttribute('draggable');
                     var ul = document.querySelector('ul');
-                    li.className = 'draggable';
                     attr.value = 'true';
                     li.setAttributeNode(attr);
-                    button = document.createElement('button');
-                    button.className = 'btn btn-danger';
-                    button.onclick = (function() {
+                remove_button = document.createElement('button');
+                remove_button.className = 'btn btn-danger';
+                  remove_button.onclick = (function() {
                         var currentI = rowId;
                         return function() {
                             deleteItem(currentI + '');
                         }
                     })();
-                    _i = document.createElement('i');
-                    _i.className = 'glyphicon glyphicon-trash';
-                    button.appendChild(_i);
-                    li.appendChild(button);
+                _i = document.createElement('i');
+                _i.className = 'glyphicon glyphicon-trash';
+                remove_button.appendChild(_i);
+                li.appendChild(remove_button);
+
+                done_button = document.createElement('button');
+                done_button.className = 'btn btn-success';
+                  done_button.onclick = (function() {
+                        var currentI = rowId;
+                        return function() {
+                            doneItem(currentI + '');
+                        }
+                    })();
+                _i = document.createElement('i');
+                _i.className = 'glyphicon glyphicon-ok';
+                done_button.appendChild(_i);
+
+                if (todos[i]['fields']['done']){
+                    li.className = 'draggable done';
+                    done_button.setAttribute('disabled', 'disabled');
+                    done_button.className = 'btn btn-success disabled';
+                }else{
+                    li.className = 'draggable';
+                }
+
+
+                li.appendChild(done_button);
                     input = document.createElement('input');
                     input.id = 'todo_' + rowId;
                     input.className = 'todo_input';
@@ -242,7 +288,6 @@
                 }
             },
             error: function(data, textStatus) {
-                alert(data.content);
                 console.log(data);
             }
         });
