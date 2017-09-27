@@ -48,9 +48,15 @@ class TodoDone(AjaxMixin, BaseUpdateView):
         return self.render_json_response({})
 
 
-class TodoUndone(BaseUpdateView):
+class TodoUndone(AjaxMixin, BaseUpdateView):
     """View para listar a tarefa como desfeita"""
-    pass
+    model = Todo
+
+    def post_ajax(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.done = False
+        self.object.save()
+        return self.render_json_response({})
 
 
 class TodoOrder(BaseUpdateView):
