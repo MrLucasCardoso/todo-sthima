@@ -1,7 +1,8 @@
-from braces.views import AjaxResponseMixin, JSONResponseMixin
 from django.views.generic import CreateView, ListView, DeleteView, UpdateView, TemplateView, View
 from core.models import Todo
 from django.core.serializers import serialize
+
+from utils.mixins import AjaxMixin
 
 
 class HomeView(TemplateView):
@@ -9,7 +10,7 @@ class HomeView(TemplateView):
     template_name = 'index.html'
 
 
-class TodoList(JSONResponseMixin, AjaxResponseMixin, ListView):
+class TodoList(AjaxMixin, ListView):
     """View para listar todas as tarefas"""
     model = Todo
 
@@ -17,29 +18,17 @@ class TodoList(JSONResponseMixin, AjaxResponseMixin, ListView):
         return self.render_json_response({'todos': serialize('json', self.get_queryset())})
 
 
-class TodoCreate(JSONResponseMixin, AjaxResponseMixin, CreateView):
+class TodoCreate(AjaxMixin, CreateView):
     """View para cadastro de tarefas"""
     model = Todo
     fields = ('name', 'content')
 
-    def get_ajax(self, request, *args, **kwargs):
-        return self.render_json_response({})
 
-    def post_ajax(self, request, *args, **kwargs):
-        form = self.get_form()
-        if form.is_valid():
-            todo = form.save()
-            json_string = serialize('json', [todo, ])[:-1][1:]  # removendo [] da string gerada
-            return self.render_json_response(json_string, status=201)
-        else:
-            json_dict = {'errors': [(k, v[0].__str__()) for k, v in form.errors.items()]}  # gerando json de retorno \
-            # com erros
-            return self.render_json_response(json_dict, status=400)
-
-
-class TodoUpdate(UpdateView):
+class TodoUpdate(AjaxMixin, UpdateView):
     """View para atualização de tarefa"""
-    pass
+    model = Todo
+    success_status = 200
+    fields = ('name', 'content')
 
 
 class TodoDelete(DeleteView):
