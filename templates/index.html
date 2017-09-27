@@ -87,7 +87,7 @@
         });
     }
 
-    function updateItem(event, args) {
+    function updateItem(event) {
         var name = event.srcElement.value;
         var pk = event.srcElement.id.replace('todo_', '');
         $.ajax({
@@ -140,7 +140,14 @@
                 _i.className = 'glyphicon glyphicon-trash';
                 button.appendChild(_i);
                 li.appendChild(button);
-                li.appendChild(document.createTextNode(' ' + newItem));
+                input = document.createElement('input');
+                input.id = 'todo_' + rowId;
+                input.className = 'todo_input';
+                input.value = data['fields']['name'];
+                input.onkeyup = function (event) {
+                        updateItem(event);
+                };
+                li.appendChild(input);
                 ul.appendChild(li);
                 addEventsDragAndDrop(li);
             },
@@ -187,10 +194,9 @@
                     input.id = 'todo_' + rowId;
                     input.className = 'todo_input';
                     input.value = todos[i]['fields']['name'];
-                    input.onkeyup = function (event, args) {
-                            updateItem(event, args);
+                    input.onkeyup = function (event) {
+                            updateItem(event);
                     };
-{#                    li.appendChild(document.createTextNode(' ' + todos[i]['fields']['name']));#}
                     li.appendChild(input);
                     ul.appendChild(li);
                     addEventsDragAndDrop(li);
