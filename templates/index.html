@@ -3,5 +3,146 @@
 
 
 {% block content %}
-    <h1>Testando</h1>
+
+    <h1>TO-DO STHIMA <br> <small>Avaliação Técnica</small></h1>
+    <div class="adder">
+        <input type="text" class="input" placeholder="Adicione uma tarefa !"/>
+        <span class="add">+</span>
+    </div>
+    <ul>
+{#        <li class="draggable" draggable="true"><button class="btn btn-danger"><i class="glyphicon glyphicon-trash"></i></button> JavaScript</li>#}
+    </ul>
+
+{% endblock %}
+
+{% block scripts %}
+    <script type="application/javascript">
+    var btn = document.querySelector('.add');
+    var remove = document.querySelector('.draggable');
+
+    function dragStart(e) {
+      this.style.opacity = '0.4';
+      dragSrcEl = this;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/html', this.innerHTML);
+    };
+
+    function dragEnter(e) {
+      this.classList.add('over');
+    }
+
+    function dragLeave(e) {
+      e.stopPropagation();
+      this.classList.remove('over');
+    }
+
+    function dragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      return false;
+    }
+
+    function dragDrop(e) {
+      if (dragSrcEl != this) {
+        dragSrcEl.innerHTML = this.innerHTML;
+        this.innerHTML = e.dataTransfer.getData('text/html');
+      }
+      return false;
+    }
+
+    function dragEnd(e) {
+      var listItens = document.querySelectorAll('.draggable');
+      [].forEach.call(listItens, function(item) {
+        item.classList.remove('over');
+      });
+      this.style.opacity = '1';
+    }
+
+    function addEventsDragAndDrop(el) {
+      el.addEventListener('dragstart', dragStart, false);
+      el.addEventListener('dragenter', dragEnter, false);
+      el.addEventListener('dragover', dragOver, false);
+      el.addEventListener('dragleave', dragLeave, false);
+      el.addEventListener('drop', dragDrop, false);
+      el.addEventListener('dragend', dragEnd, false);
+    }
+
+    var listItens = document.querySelectorAll('.draggable');
+    [].forEach.call(listItens, function(item) {
+      addEventsDragAndDrop(item);
+    });
+
+    function addNewItem() {
+      var newItem = document.querySelector('.input').value;
+      if (newItem != '') {
+        document.querySelector('.input').value = '';
+        var li = document.createElement('li');
+        var attr = document.createAttribute('draggable');
+        var ul = document.querySelector('ul');
+        li.className = 'draggable';
+        attr.value = 'true';
+        li.setAttributeNode(attr);
+        button = document.createElement('button');
+        button.className = 'btn btn-danger';
+        _i = document.createElement('i');
+        _i.className = 'glyphicon glyphicon-trash';
+        button.appendChild(_i);
+        li.appendChild(button);
+        li.appendChild(document.createTextNode(' ' + newItem));
+        ul.appendChild(li);
+        addEventsDragAndDrop(li);
+        $.ajax({
+            type: 'POST',
+            url: '{% url 'todo-add' %}',
+            dataType: 'json',
+            data: {
+                name: newItem,
+                content: ''
+            },
+            success: function(data, textStatus, algo) {
+               console.log(data);
+            },
+            error: function(data, textStatus) {
+                alert(data.content.result);
+                console.log(data);
+            }
+        });
+      }
+    }
+
+    btn.addEventListener('click', addNewItem);
+
+    $(window).on('load', function () {
+        $.ajax({
+            type: 'GET',
+            url: '{% url 'todo-list' %}',
+            dataType: 'json',
+            success: function(data, textStatus, algo) {
+                todos = data.todos
+                for (i = 0; i < todos.length; i++) {
+                    var li = document.createElement('li');
+                    var attr = document.createAttribute('draggable');
+                    var ul = document.querySelector('ul');
+                    li.className = 'draggable';
+                    attr.value = 'true';
+                    li.setAttributeNode(attr);
+                    button = document.createElement('button');
+                    button.className = 'btn btn-danger';
+                    _i = document.createElement('i');
+                    _i.className = 'glyphicon glyphicon-trash';
+                    button.appendChild(_i);
+                    li.appendChild(button);
+                    li.appendChild(document.createTextNode(' ' + todos[i]['fields']['name']));
+                    ul.appendChild(li);
+                    addEventsDragAndDrop(li);
+                }
+            },
+            error: function(data, textStatus) {
+                alert(data.content.result);
+                console.log(data);
+            }
+        });
+    });
+
+    </script>
 {% endblock %}

@@ -4,7 +4,7 @@ from django.views.generic.edit import BaseUpdateView
 from core.enums import OrderType
 from core.models import Todo
 from django.core.serializers import serialize
-
+import json
 from utils.mixins import AjaxMixin
 
 
@@ -16,9 +16,10 @@ class HomeView(TemplateView):
 class TodoList(AjaxMixin, ListView):
     """View para listar todas as tarefas"""
     model = Todo
+    ordering = 'ranking'
 
     def get_ajax(self, request, *args, **kwargs):
-        return self.render_json_response({'todos': serialize('json', self.get_queryset())})
+        return self.render_json_response({'todos': json.loads(serialize('json', self.get_queryset()))})
 
 
 class TodoCreate(AjaxMixin, CreateView):

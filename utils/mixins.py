@@ -1,8 +1,8 @@
-from braces.views import AjaxResponseMixin, JSONResponseMixin
+from braces.views import AjaxResponseMixin, JSONResponseMixin, CsrfExemptMixin
 from django.core.serializers import serialize
 
 
-class AjaxMixin(JSONResponseMixin, AjaxResponseMixin):
+class AjaxMixin(CsrfExemptMixin, JSONResponseMixin, AjaxResponseMixin):
     success_status = 201
 
     def get_ajax(self, request, *args, **kwargs):
