@@ -38,10 +38,14 @@ class Todo(models.Model):
 
     def delete(self, using=None, keep_parents=False):
         """Sobrescrevendo metodo delete para atualizar o campo ranking"""
+        old_ranking = self.ranking
 
-        todos = self.__class__.objects.filter(ranking__gt=self.ranking)  # Filtrando por tarefas com ranking superior
+        obj = super(Todo, self).delete(using, keep_parents)
+
+        todos = self.__class__.objects.filter(ranking__gt=old_ranking).order_by('ranking')  # Filtrando por tarefas com ranking superior
         for todo in todos:  # Caso existam devo diminuir em 1 cada uma delas
             todo.ranking -= 1
             todo.save()
 
-        return super(Todo, self).delete(using, keep_parents)
+        return obj
+

@@ -113,7 +113,7 @@ class TestTodo(TestCase):
 
         response = self.client.post(reverse('todo-update', args=args), data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(200, response.status_code, 'Deve retornar 200 como sucesso de criação de uma tarefa')
-        self.assertEqual(4, Todo.objects.count(), 'Deve ser 4 com a tarefa adicionada')
+        self.assertEqual(4, Todo.objects.count(), 'Deve ser 4 com a tarefa alterada')
 
         data = response.content
         self.assertIs(bytes, type(data), 'Retorna o json em bytes')
@@ -157,10 +157,16 @@ class TestTodo(TestCase):
 
     def test_todo_delete_view(self):
         """
-        Testando acesso a home da aplicação
+        Testando remoção de uma tarefa
         """
-        response = self.client.get(reverse('home'), HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-        self.assertEqual(response.status_code, 200, 'Deve retornar 200 como sucesso de acesso à view')
+        args = (self.todo.pk,)  # Id da tarefa a ser alterada
+        response = self.client.delete(reverse('todo-delete', args=args), HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(200, response.status_code, 'Deve retornar 200 como sucesso de criação de uma tarefa')
+        self.assertEqual(3, Todo.objects.count(), 'Deve ser 3 com a tarefa removida')
+
+        # Deve levantar esta exceção pois a tarefa desve estar removida
+        with self.assertRaisesMessage(Todo.DoesNotExist, "Todo matching query does not exist"):
+            Todo.objects.get(id=args[0])
 
     def test_todo_done_view(self):
         """

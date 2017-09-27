@@ -24,3 +24,8 @@ class AjaxMixin(JSONResponseMixin, AjaxResponseMixin):
             json_dict = {'errors': [(k, v[0].__str__()) for k, v in form.errors.items()]}  # gerando json de retorno \
             # com erros
             return self.render_json_response(json_dict, status=400)
+
+    def delete_ajax(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.delete()
+        return self.render_json_response({})

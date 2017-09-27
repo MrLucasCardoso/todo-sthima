@@ -31,9 +31,9 @@ class TodoUpdate(AjaxMixin, UpdateView):
     fields = ('name', 'content')
 
 
-class TodoDelete(DeleteView):
+class TodoDelete(AjaxMixin, DeleteView):
     """View para remover uma tarefa"""
-    pass
+    model = Todo
 
 
 class TodoDone(View):
