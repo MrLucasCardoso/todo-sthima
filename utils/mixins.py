@@ -1,5 +1,6 @@
 from braces.views import AjaxResponseMixin, JSONResponseMixin, CsrfExemptMixin
 from django.core.serializers import serialize
+import json
 
 
 class AjaxMixin(CsrfExemptMixin, JSONResponseMixin, AjaxResponseMixin):
@@ -18,7 +19,7 @@ class AjaxMixin(CsrfExemptMixin, JSONResponseMixin, AjaxResponseMixin):
         form = self.get_form()
         if form.is_valid():
             todo = form.save()
-            json_string = serialize('json', [todo, ])[:-1][1:]  # removendo [] da string gerada
+            json_string = json.loads(serialize('json', [todo, ])[:-1][1:])  # removendo [] da string gerada
             return self.render_json_response(json_string, status=self.success_status)
         else:
             json_dict = {'errors': [(k, v[0].__str__()) for k, v in form.errors.items()]}  # gerando json de retorno \

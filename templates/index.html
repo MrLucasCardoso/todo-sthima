@@ -72,25 +72,24 @@
       addEventsDragAndDrop(item);
     });
 
+    function deleteItem(pk) {
+        $.ajax({
+            type: 'DELETE',
+            url: '/todo/' + pk + '/delete/',
+            dataType: 'json',
+            success: function(data, textStatus, algo) {
+                load_tados();
+            },
+            error: function(data, textStatus) {
+                alert(data.content.result);
+                console.log(data);
+            }
+        });
+    }
+
     function addNewItem() {
       var newItem = document.querySelector('.input').value;
       if (newItem != '') {
-        document.querySelector('.input').value = '';
-        var li = document.createElement('li');
-        var attr = document.createAttribute('draggable');
-        var ul = document.querySelector('ul');
-        li.className = 'draggable';
-        attr.value = 'true';
-        li.setAttributeNode(attr);
-        button = document.createElement('button');
-        button.className = 'btn btn-danger';
-        _i = document.createElement('i');
-        _i.className = 'glyphicon glyphicon-trash';
-        button.appendChild(_i);
-        li.appendChild(button);
-        li.appendChild(document.createTextNode(' ' + newItem));
-        ul.appendChild(li);
-        addEventsDragAndDrop(li);
         $.ajax({
             type: 'POST',
             url: '{% url 'todo-add' %}',
@@ -100,7 +99,30 @@
                 content: ''
             },
             success: function(data, textStatus, algo) {
-               console.log(data);
+                console.log(data);
+                var rowId = data['pk'];
+                document.querySelector('.input').value = '';
+                var li = document.createElement('li');
+                var attr = document.createAttribute('draggable');
+                var ul = document.querySelector('ul');
+                li.className = 'draggable';
+                attr.value = 'true';
+                li.setAttributeNode(attr);
+                button = document.createElement('button');
+                button.className = 'btn btn-danger';
+                  button.onclick = (function() {
+                        var currentI = rowId;
+                        return function() {
+                            deleteItem(currentI + '');
+                        }
+                    })();
+                _i = document.createElement('i');
+                _i.className = 'glyphicon glyphicon-trash';
+                button.appendChild(_i);
+                li.appendChild(button);
+                li.appendChild(document.createTextNode(' ' + newItem));
+                ul.appendChild(li);
+                addEventsDragAndDrop(li);
             },
             error: function(data, textStatus) {
                 alert(data.content.result);
@@ -112,14 +134,17 @@
 
     btn.addEventListener('click', addNewItem);
 
-    $(window).on('load', function () {
+    function load_tados() {
         $.ajax({
             type: 'GET',
             url: '{% url 'todo-list' %}',
             dataType: 'json',
             success: function(data, textStatus, algo) {
-                todos = data.todos
+                var ul = document.querySelector('ul')
+                ul.innerHTML = "";
+                todos = data.todos;
                 for (i = 0; i < todos.length; i++) {
+                    var rowId = todos[i]['pk'];
                     var li = document.createElement('li');
                     var attr = document.createAttribute('draggable');
                     var ul = document.querySelector('ul');
@@ -128,6 +153,12 @@
                     li.setAttributeNode(attr);
                     button = document.createElement('button');
                     button.className = 'btn btn-danger';
+                    button.onclick = (function() {
+                        var currentI = rowId;
+                        return function() {
+                            deleteItem(currentI + '');
+                        }
+                    })();
                     _i = document.createElement('i');
                     _i.className = 'glyphicon glyphicon-trash';
                     button.appendChild(_i);
@@ -142,6 +173,10 @@
                 console.log(data);
             }
         });
+    }
+
+    $(window).on('load', function () {
+       load_tados();
     });
 
     </script>
