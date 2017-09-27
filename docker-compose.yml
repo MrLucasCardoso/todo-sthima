@@ -1,0 +1,25 @@
+version: '2'
+services:
+  nginx:
+    image: nginx:latest
+    container_name: ngnix_todo_sthima
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./config/nginx:/etc/nginx/conf.d
+      - static-data:/staticfiles
+    depends_on:
+      - web
+  web:
+    build: .
+    container_name: app_todo_sthima
+    command: bash -c "python manage.py migrate && gunicorn todo_sthima.wsgi:application --bind 0.0.0.0:8000 --workers 3 --log-level=debug --log-file=-"
+    volumes:
+      - static-data:/todo_sthima/staticfiles
+    expose:
+      - "8000"
+    environment:
+        - DEBUG=False
+
+volumes:
+  static-data:

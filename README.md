@@ -2,6 +2,8 @@
 Avaliação técnica para STHIMA
 
 # Instalação
+
+### Linux 
 Apos clonar o repositório, deve criar uma virtualenv usando python 3.5+ e instalar os requirements do projeto:
 
 ```bash
@@ -24,6 +26,12 @@ Para rodar a aplicação, simplesmente um runserver:
 
 ```bash
 $ ./manage.py runserver
+```
+
+### Docker
+Apos clonar o repositório:
+```bash
+$ docker-compose up -d
 ```
 
 A aplicação irá rodar no http://localhost:8000/
