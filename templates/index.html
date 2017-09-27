@@ -87,6 +87,26 @@
         });
     }
 
+    function updateItem(event, args) {
+        var name = event.srcElement.value;
+        var pk = event.srcElement.id.replace('todo_', '');
+        $.ajax({
+            type: 'POST',
+            url: '/todo/' + pk + '/update/',
+            dataType: 'json',
+            data: {
+                name: name
+            },
+            success: function(data, textStatus, algo) {
+
+            },
+            error: function(data, textStatus) {
+                alert(data.content.result);
+                console.log(data);
+            }
+        });
+    }
+
     function addNewItem() {
       var newItem = document.querySelector('.input').value;
       if (newItem != '') {
@@ -140,7 +160,7 @@
             url: '{% url 'todo-list' %}',
             dataType: 'json',
             success: function(data, textStatus, algo) {
-                var ul = document.querySelector('ul')
+                var ul = document.querySelector('ul');
                 ul.innerHTML = "";
                 todos = data.todos;
                 for (i = 0; i < todos.length; i++) {
@@ -163,7 +183,15 @@
                     _i.className = 'glyphicon glyphicon-trash';
                     button.appendChild(_i);
                     li.appendChild(button);
-                    li.appendChild(document.createTextNode(' ' + todos[i]['fields']['name']));
+                    input = document.createElement('input');
+                    input.id = 'todo_' + rowId;
+                    input.className = 'todo_input';
+                    input.value = todos[i]['fields']['name'];
+                    input.onkeyup = function (event, args) {
+                            updateItem(event, args);
+                    };
+{#                    li.appendChild(document.createTextNode(' ' + todos[i]['fields']['name']));#}
+                    li.appendChild(input);
                     ul.appendChild(li);
                     addEventsDragAndDrop(li);
                 }
