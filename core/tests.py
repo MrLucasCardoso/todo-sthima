@@ -49,44 +49,86 @@ class TestTodo(TestCase):
         self.assertTrue('changed' in item['fields'], 'Verifica se tem a chave "changed" no json')
         self.assertTrue('ranking' in item['fields'], 'Verifica se tem a chave "ranking" no json')
 
-    def test_todo_create_view(self):
+    def test_valid_todo_create_view(self):
         """
         Testando acesso a home da aplicação
         """
-        response = self.client.get(reverse('home'))
-        self.assertEqual(response.status_code, 200, 'Deve retornar 200 como sucesso de acesso à view')
+        response = self.client.get(reverse('todo-add'), HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(200, response.status_code, 'Deve retornar 200 como sucesso de acesso à view')
+
+        data = {'name': 'Testando View', 'content': 'Conteudo'}  # Dicionarios com dados do Tarefa
+
+        response = self.client.post(reverse('todo-add'), data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(201, response.status_code, 'Deve retornar 201 como sucesso de criação de uma tarefa')
+        self.assertEqual(5, Todo.objects.count(), 'Deve ser 5 com a tarefa adicionada')
+
+        data = response.content
+        self.assertIs(bytes, type(data), 'Retorna o json em bytes')
+
+        returned_json = json.loads(data.decode('utf8').replace("'", '"'))
+        returned_json = json.loads(returned_json)
+
+        self.assertTrue('pk' in returned_json, 'Verifica se tem a chave "pk" no json')
+        self.assertTrue('fields' in returned_json, 'Verifica se tem a chave "fields" no json')
+        self.assertTrue('name' in returned_json['fields'], 'Verifica se tem a chave "name" no json')
+        self.assertTrue('content' in returned_json['fields'], 'Verifica se tem a chave "content" no json')
+        self.assertTrue('done' in returned_json['fields'], 'Verifica se tem a chave "done" no json')
+        self.assertTrue('created' in returned_json['fields'], 'Verifica se tem a chave "created" no json')
+        self.assertTrue('changed' in returned_json['fields'], 'Verifica se tem a chave "changed" no json')
+        self.assertTrue('ranking' in returned_json['fields'], 'Verifica se tem a chave "ranking" no json')
+
+        self.assertEqual('Testando View', returned_json['fields']['name'], 'Verificando nome')
+        self.assertEqual('Conteudo', returned_json['fields']['content'], 'Verificando conteudo')
+
+    def test_invalid_todo_create_view(self):
+        data = {'name': '', 'content': 'Conteudo'}  # Dicionarios com dados do Tarefa
+
+        response = self.client.post(reverse('todo-add'), data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(400, response.status_code, 'Deve retornar 400 devido o erro  de validação')
+        self.assertEqual(4, Todo.objects.count(), 'Deve ser 4 a tarefa não dever ser adicionada')
+
+        data = response.content
+        self.assertIs(bytes, type(data), 'Retorna o json em bytes')
+
+        returned_json = json.loads(data.decode('utf8').replace("'", '"'))
+
+        self.assertTrue('errors' in returned_json, 'Verifica se tem a chave "errors" no json')
+        self.assertIs(list, type(returned_json['errors']), 'Verifica se chave "errors" é umas lista')
+
+        item = returned_json['errors'][0]
+        self.assertEqual('name', item[0], 'Field que foi invalidado')
 
     def test_todo_update_view(self):
         """
         Testando acesso a home da aplicação
         """
-        response = self.client.get(reverse('home'))
+        response = self.client.get(reverse('home'), HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200, 'Deve retornar 200 como sucesso de acesso à view')
 
     def test_todo_delete_view(self):
         """
         Testando acesso a home da aplicação
         """
-        response = self.client.get(reverse('home'))
+        response = self.client.get(reverse('home'), HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200, 'Deve retornar 200 como sucesso de acesso à view')
 
     def test_todo_done_view(self):
         """
         Testando acesso a home da aplicação
         """
-        response = self.client.get(reverse('home'))
+        response = self.client.get(reverse('home'), HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200, 'Deve retornar 200 como sucesso de acesso à view')
 
     def test_todo_undone_view(self):
         """
         Testando acesso a home da aplicação
         """
-        response = self.client.get(reverse('home'))
+        response = self.client.get(reverse('home'), HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200, 'Deve retornar 200 como sucesso de acesso à view')
 
     def test_todo_order_view(self):
         """
         Testando acesso a home da aplicação
         """
-        response = self.client.get(reverse('home'))
+        response = self.client.get(reverse('home'), HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200, 'Deve retornar 200 como sucesso de acesso à view')

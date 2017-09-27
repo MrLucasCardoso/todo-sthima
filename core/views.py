@@ -17,9 +17,24 @@ class TodoList(JSONResponseMixin, AjaxResponseMixin, ListView):
         return self.render_json_response({'todos': serialize('json', self.get_queryset())})
 
 
-class TodoCreate(CreateView):
+class TodoCreate(JSONResponseMixin, AjaxResponseMixin, CreateView):
     """View para cadastro de tarefas"""
-    pass
+    model = Todo
+    fields = ('name', 'content')
+
+    def get_ajax(self, request, *args, **kwargs):
+        return self.render_json_response({})
+
+    def post_ajax(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            todo = form.save()
+            json_string = serialize('json', [todo, ])[:-1][1:]  # removendo [] da string gerada
+            return self.render_json_response(json_string, status=201)
+        else:
+            json_dict = {'errors': [(k, v[0].__str__()) for k, v in form.errors.items()]}  # gerando json de retorno \
+            # com erros
+            return self.render_json_response(json_dict, status=400)
 
 
 class TodoUpdate(UpdateView):
