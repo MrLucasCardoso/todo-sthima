@@ -172,8 +172,11 @@ class TestTodo(TestCase):
         """
         Testando acesso a home da aplicação
         """
-        response = self.client.get(reverse('home'), HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-        self.assertEqual(response.status_code, 200, 'Deve retornar 200 como sucesso de acesso à view')
+        args = (self.todo.pk,)  # Id da tarefa a ser alterada
+        response = self.client.post(reverse('todo-done', args=args), HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(200, response.status_code, 'Deve retornar 200 como sucesso de acesso à view')
+        todo = Todo.objects.get(pk=args[0])
+        self.assertTrue(todo.done, 'Tarefa deve estar marcada como feita(done)')
 
     def test_todo_undone_view(self):
         """

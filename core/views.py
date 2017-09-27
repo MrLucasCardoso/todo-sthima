@@ -1,4 +1,5 @@
-from django.views.generic import CreateView, ListView, DeleteView, UpdateView, TemplateView, View
+from django.views.generic import CreateView, ListView, DeleteView, UpdateView, TemplateView
+from django.views.generic.edit import BaseUpdateView
 from core.models import Todo
 from django.core.serializers import serialize
 
@@ -36,16 +37,22 @@ class TodoDelete(AjaxMixin, DeleteView):
     model = Todo
 
 
-class TodoDone(View):
+class TodoDone(AjaxMixin, BaseUpdateView):
     """View para listar a tarefa como feita"""
-    pass
+    model = Todo
+
+    def post_ajax(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.done = True
+        self.object.save()
+        return self.render_json_response({})
 
 
-class TodoUndone(View):
+class TodoUndone(BaseUpdateView):
     """View para listar a tarefa como desfeita"""
     pass
 
 
-class TodoOrder(View):
+class TodoOrder(BaseUpdateView):
     """View para alterar ordenação das tarefas"""
     pass
