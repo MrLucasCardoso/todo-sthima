@@ -16,7 +16,7 @@ class Todo(models.Model):
     class Meta:
         verbose_name = 'TODO'
         verbose_name_plural = 'TODOs'
-        ordering = ('-ranking', )
+        ordering = ('ranking', )
 
     def __str__(self):
         """Retornando o nome da tarefa"""

@@ -1,5 +1,6 @@
 from django.test import TestCase, Client
 
+from core.enums import OrderType
 from core.models import Todo
 from model_mommy import mommy
 from django.core.urlresolvers import reverse
@@ -206,9 +207,57 @@ class TestTodo(TestCase):
         self.assertFalse(todo.done, 'Tarefa deve estar marcada como feita(done)')
         self.assertNotEqual(self.todo.done, todo.done, 'Devem ser diferentes')
 
-    def test_todo_order_view(self):
+    def test_todo_unit_order_view(self):
         """
-        Testando acesso a home da aplicação
+        Testando altareção de ordem das tarefas por unidade
+        campo ranking iniciando com 1
         """
-        response = self.client.get(reverse('home'), HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-        self.assertEqual(response.status_code, 200, 'Deve retornar 200 como sucesso de acesso à view')
+        # Testando de uma posição menor para maior
+        data = {'order_type': OrderType.UNIT.value, 'pk': self.todo.pk, 'ranking': 3}
+        response = self.client.post(reverse('todo-order'), data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(200, response.status_code, 'Deve retornar 200 como sucesso de acesso à view')
+
+        todo = Todo.objects.get(pk=self.todo.pk)
+
+        self.assertEqual(3, todo.ranking, 'Ranking de ser atualizado para 3')
+        self.assertNotEqual(self.todo.ranking, todo.ranking, 'Ranking deve ser diferente do anterior')
+        self.assertEqual(Todo.objects.all().order_by('ranking')[2].pk, todo.pk, 'Deve ser a mesma tarefa na terceira posição')
+
+        # Testando de uma posição maior para menor
+        data = {'order_type': OrderType.UNIT.value, 'pk': todo.pk, 'ranking': 1}
+        response = self.client.post(reverse('todo-order'), data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(200, response.status_code, 'Deve retornar 200 como sucesso de acesso à view')
+
+        _todo = Todo.objects.get(pk=self.todo.pk)
+
+        self.assertEqual(1, _todo.ranking, 'Ranking de ser atualizado para 1')
+        self.assertNotEqual(todo.ranking, _todo.ranking, 'Ranking deve ser diferente do anterior')
+        self.assertEqual(Todo.objects.all().order_by('ranking')[0].pk, _todo.pk, 'Deve ser a mesma tarefa na primeira posição')
+
+    # def test_todo_name_order_view(self):
+    #     """
+    #     Testando altareção de ordem das tarefas por campo nome
+    #     """
+    #     response = self.client.post(reverse('todo-order'), HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+    #     self.assertEqual(200, response.status_code, 'Deve retornar 200 como sucesso de acesso à view')
+    #
+    # def test_todo_created_order_view(self):
+    #     """
+    #     Testando altareção de ordem das tarefas por data de criação
+    #     """
+    #     response = self.client.post(reverse('todo-order'), HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+    #     self.assertEqual(200, response.status_code, 'Deve retornar 200 como sucesso de acesso à view')
+    #
+    # def test_todo_changed_order_view(self):
+    #     """
+    #     Testando altareção de ordem das tarefas por data de alteração
+    #     """
+    #     response = self.client.post(reverse('todo-order'), HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+    #     self.assertEqual(200, response.status_code, 'Deve retornar 200 como sucesso de acesso à view')
+    #
+    # def test_todo_done_order_view(self):
+    #     """
+    #     Testando altareção de ordem das tarefas por tarefas feitas
+    #     """
+    #     response = self.client.post(reverse('todo-order'), HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+    #     self.assertEqual(200, response.status_code, 'Deve retornar 200 como sucesso de acesso à view')

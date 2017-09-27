@@ -1,5 +1,7 @@
-from django.views.generic import CreateView, ListView, DeleteView, UpdateView, TemplateView
+from django.views.generic import CreateView, ListView, DeleteView, UpdateView, TemplateView, View
 from django.views.generic.edit import BaseUpdateView
+
+from core.enums import OrderType
 from core.models import Todo
 from django.core.serializers import serialize
 
@@ -59,6 +61,58 @@ class TodoUndone(AjaxMixin, BaseUpdateView):
         return self.render_json_response({})
 
 
-class TodoOrder(BaseUpdateView):
+class TodoOrder(AjaxMixin, View):
     """View para alterar ordenação das tarefas"""
-    pass
+
+    def post_ajax(self, request, *args, **kwargs):
+        order_type = int(request.POST.get('order_type', -1))
+        kwargs['data'] = request.POST.dict()
+
+        if order_type == -1:
+            return self.render_json_response({}, status=400)
+
+        # Despachando para o metodo referente ao tipo de ordenação
+        for value, name in OrderType.choices():
+            if order_type == value:
+                handler = getattr(self, 'order_{0}'.format(name.lower()))
+                return handler(request, *args, **kwargs)
+
+        return self.render_json_response({}, status=400)
+
+    def order_unit(self, request, *args, **kwargs):
+        data = kwargs['data']
+        todo = Todo.objects.get(pk=data['pk'])
+        ranking = int(data['ranking'])
+
+        if ranking > todo.ranking:  # se a nova posição for maior que a atual
+            todo.ranking = -1
+            todo.save()
+
+            todos = Todo.objects.exclude(pk=data['pk']).filter(ranking__lte=ranking, ranking__gt=0).order_by(
+                'ranking'
+            )  # Inferior ou igual al atual
+
+            for _ in todos:  # Caso existam devo diminuir em 1 cada uma delas
+                _.ranking -= 1
+                _.save()
+
+            todo.ranking = ranking
+            todo.save()
+
+        elif ranking < todo.ranking:  # se a nova posição for menor que a atual
+            old_ranking = todo.ranking
+            todo.ranking = -1
+            todo.save()
+
+            todos = Todo.objects.exclude(pk=data['pk']).filter(ranking__gte=ranking, ranking__lt=old_ranking).order_by(
+                '-ranking'
+            )  # Inferior ou igual al atual
+
+            for _ in todos:  # Caso existam devo diminuir em 1 cada uma delas
+                _.ranking += 1
+                _.save()
+
+            todo.ranking = ranking
+            todo.save()
+
+        return self.render_json_response({}, status=200)
