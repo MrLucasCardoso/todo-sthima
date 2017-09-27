@@ -19,5 +19,5 @@ from core import urls
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^$', include(urls))
+    url(r'^', include(urls))
 ]
