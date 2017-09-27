@@ -11,7 +11,7 @@ class Todo(models.Model):
     done = models.BooleanField(default=False)  # Flag para tarefa concluida e não concluida
     created = models.DateTimeField(auto_now_add=True)  # Data de criação da tarefa
     changed = models.DateTimeField(auto_now_add=True)  # Data de alteração da tarefa
-    ranking = models.IntegerField(unique=True)  # Posição da tarefa, para poder alterar a ordem das mesmas manualmente
+    ranking = models.IntegerField()  # Posição da tarefa, para poder alterar a ordem das mesmas manualmente
 
     class Meta:
         verbose_name = 'TODO'

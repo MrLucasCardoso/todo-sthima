@@ -86,14 +86,12 @@ class TodoOrder(AjaxMixin, View):
         ranking = int(data['ranking'])
 
         if ranking > todo.ranking:  # se a nova posição for maior que a atual
-            todo.ranking = -1
-            todo.save()
-
-            todos = Todo.objects.exclude(pk=data['pk']).filter(ranking__lte=ranking, ranking__gt=0).order_by(
+            todos = Todo.objects.exclude(pk=data['pk']).filter(ranking__lte=ranking).order_by(
                 'ranking'
             )  # Inferior ou igual al atual
 
             for _ in todos:  # Caso existam devo diminuir em 1 cada uma delas
+                print(_.ranking)
                 _.ranking -= 1
                 _.save()
 
@@ -102,9 +100,6 @@ class TodoOrder(AjaxMixin, View):
 
         elif ranking < todo.ranking:  # se a nova posição for menor que a atual
             old_ranking = todo.ranking
-            todo.ranking = -1
-            todo.save()
-
             todos = Todo.objects.exclude(pk=data['pk']).filter(ranking__gte=ranking, ranking__lt=old_ranking).order_by(
                 '-ranking'
             )  # Inferior ou igual al atual
