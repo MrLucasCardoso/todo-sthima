@@ -35,7 +35,6 @@ class TestTodo(TestCase):
 
         returned_json = data.decode('utf8').replace("'", '"')
         returned_json = json.loads(returned_json)
-        returned_json['todos'] = json.loads(returned_json['todos'])
 
         self.assertEqual(4, len(returned_json['todos']), 'quantidades de tarefas criadas')
 
@@ -67,7 +66,6 @@ class TestTodo(TestCase):
         self.assertIs(bytes, type(data), 'Retorna o json em bytes')
 
         returned_json = json.loads(data.decode('utf8').replace("'", '"'))
-        returned_json = json.loads(returned_json)
 
         self.assertTrue('pk' in returned_json, 'Verifica se tem a chave "pk" no json')
         self.assertTrue('fields' in returned_json, 'Verifica se tem a chave "fields" no json')
@@ -120,7 +118,6 @@ class TestTodo(TestCase):
         self.assertIs(bytes, type(data), 'Retorna o json em bytes')
 
         returned_json = json.loads(data.decode('utf8').replace("'", '"'))
-        returned_json = json.loads(returned_json)
 
         self.assertTrue('pk' in returned_json, 'Verifica se tem a chave "pk" no json')
         self.assertTrue('fields' in returned_json, 'Verifica se tem a chave "fields" no json')
