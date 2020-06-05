@@ -1,4 +1,4 @@
-Django==1.11.23
+Django==1.11.29
 django-braces==1.11.0
 gunicorn==19.7.1
 model-mommy==1.4.0
